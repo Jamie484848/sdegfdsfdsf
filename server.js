@@ -71,7 +71,7 @@ if (isS3Mode) {
     fileFilter: buildMulterFileFilter()
   });
 } else {
-  uploadDir = path.join(__dirname, "uploads");
+  uploadDir = process.env.UPLOAD_DIR || path.join(__dirname, "uploads");
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
   }
@@ -188,5 +188,9 @@ app.use((err, _req, res, _next) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT} using ${storageProvider} storage`);
+  if (isS3Mode) {
+    console.log(`Server running on port ${PORT} using s3 storage`);
+  } else {
+    console.log(`Server running on port ${PORT} using local storage at ${uploadDir}`);
+  }
 });

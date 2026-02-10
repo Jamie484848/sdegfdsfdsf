@@ -12,43 +12,54 @@ npm start
 
 Dann im Browser oeffnen: `http://localhost:3000`
 
-## Persistenter Speicher (wichtig)
+## Speicher-Modi
 
 Die App unterstuetzt 2 Modi:
 
-- `local` (Standard): speichert lokal im Ordner `uploads/` (nicht dauerhaft auf Render Free/Standard).
-- `s3`: speichert dauerhaft in S3-kompatiblem Object Storage (AWS S3, Cloudflare R2, Backblaze B2).
+- `local`: speichert auf Dateisystem (mit Render Persistent Disk dauerhaft).
+- `s3`: speichert in S3-kompatiblem Object Storage (AWS S3, Cloudflare R2, Backblaze B2).
 
-Wenn du willst, dass Dateien nach Restart/Shutdown bleiben, nutze `s3`.
+## Ohne S3 dauerhaft speichern (dein Wunsch)
 
-Notwendige Umgebungsvariablen fuer `s3`:
+Nutze auf Render eine **Persistent Disk** und `local`-Modus.
 
-- `STORAGE_PROVIDER=s3`
-- `S3_BUCKET=<dein-bucket>`
-- `S3_REGION=<region oder auto bei R2>`
-- `S3_ACCESS_KEY_ID=<key>`
-- `S3_SECRET_ACCESS_KEY=<secret>`
-- Optional: `S3_ENDPOINT=<custom endpoint, z. B. fuer R2/B2>`
-- Optional: `S3_FORCE_PATH_STYLE=true|false`
+Noetige Env Vars:
+
+- `STORAGE_PROVIDER=local`
+- `UPLOAD_DIR=/var/data/uploads`
 
 ## Render Deployment
 
 1. Projekt in ein Git-Repository pushen (GitHub/GitLab).
 2. Auf Render ein neues **Web Service** aus dem Repo erstellen.
 3. Render erkennt `render.yaml` automatisch.
-4. Unter **Environment** die S3-Variablen setzen (siehe oben), damit Uploads dauerhaft sind.
+4. Service muss auf einem Plan laufen, der Persistent Disk unterstuetzt (nicht Free).
 5. Start Command: `npm start`
 6. Port: wird automatisch ueber `process.env.PORT` genutzt (bereits im Code eingebaut).
 
-Beispiel fuer Cloudflare R2:
+`render.yaml` ist bereits auf Persistent Disk + `local` konfiguriert.
+
+## Optional: S3/R2 statt Disk
+
+Falls du spaeter auf S3 gehen willst:
 
 - `STORAGE_PROVIDER=s3`
-- `S3_REGION=auto`
-- `S3_BUCKET=<bucket-name>`
-- `S3_ENDPOINT=https://<accountid>.r2.cloudflarestorage.com`
-- `S3_ACCESS_KEY_ID=<r2-access-key>`
-- `S3_SECRET_ACCESS_KEY=<r2-secret-key>`
-- `S3_FORCE_PATH_STYLE=false`
+- `S3_BUCKET=<bucket>`
+- `S3_REGION=<region>`
+- `S3_ACCESS_KEY_ID=<key>`
+- `S3_SECRET_ACCESS_KEY=<secret>`
+- Optional `S3_ENDPOINT`
+- Optional `S3_FORCE_PATH_STYLE=true|false`
+
+## GitHub als Dateispeicher
+
+Technisch moeglich ist es, Dateien in ein Repo zu committen, aber fuer Upload-Hosting ist das unpraktisch:
+
+- einzelne Dateien sind in normalen Repos auf 100 MB limitiert
+- groessere Dateien brauchen Git LFS und haben Speicher/Bandbreiten-Limits
+- jeder Upload wird dann ein Git-Commit/Push
+
+Darum ist Render Disk (ohne S3) fuer deinen Fall sinnvoller.
 
 ## API
 
