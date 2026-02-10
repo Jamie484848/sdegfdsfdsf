@@ -7,7 +7,7 @@ const { S3Client, PutObjectCommand, GetObjectCommand } = require("@aws-sdk/clien
 const app = express();
 app.set("trust proxy", true);
 
-const allowedExts = new Set([".jar", ".json"]);
+const allowedExts = new Set([".jar", ".json", ".zip"]);
 const maxFileSizeBytes = 250 * 1024 * 1024;
 
 function buildStoredName(originalName) {
@@ -24,6 +24,9 @@ function getContentType(fileName) {
   if (ext === ".json") {
     return "application/json";
   }
+  if (ext === ".zip") {
+    return "application/zip";
+  }
   return "application/octet-stream";
 }
 
@@ -33,7 +36,7 @@ function buildMulterFileFilter() {
     if (allowedExts.has(ext)) {
       return cb(null, true);
     }
-    cb(new Error("Only .jar and .json files are allowed."));
+    cb(new Error("Only .jar, .json and .zip files are allowed."));
   };
 }
 
@@ -71,7 +74,8 @@ if (isS3Mode) {
     fileFilter: buildMulterFileFilter()
   });
 } else {
-  uploadDir = process.env.UPLOAD_DIR || path.join(__dirname, "uploads");
+  const configuredUploadDir = process.env.UPLOAD_DIR;
+  uploadDir = configuredUploadDir ? path.resolve(configuredUploadDir) : path.join(__dirname, "uploads");
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
   }

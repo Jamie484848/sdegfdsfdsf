@@ -1,6 +1,6 @@
 # CallOfMine Upload Host
 
-Einfache Node/Express-Webseite zum Hochladen von `.jar` und `.json` Dateien.
+Einfache Node/Express-Webseite zum Hochladen von `.jar`, `.json` und `.zip` Dateien.
 Nach dem Upload bekommst du eine direkte Download-URL, die jede Application direkt abrufen kann.
 
 ## Lokal starten
@@ -65,7 +65,7 @@ Darum ist Render Disk (ohne S3) fuer deinen Fall sinnvoller.
 
 - `POST /upload`
   - Form-Field: `file`
-  - Erlaubt: `.jar`, `.json`
+  - Erlaubt: `.jar`, `.json`, `.zip` (z. B. `mods.zip`)
   - Antwort enthaelt `url` mit direktem Download-Link
 
 - `GET /files/:name`

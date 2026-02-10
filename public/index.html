@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>JAR/JSON Upload Host</title>
+    <title>JAR/JSON/ZIP Upload Host</title>
     <style>
       :root {
         --bg: #f6f7fb;
@@ -97,11 +97,14 @@
   </head>
   <body>
     <main class="card">
-      <h1>JAR / JSON Upload</h1>
-      <p>Lade eine <code>.jar</code> oder <code>.json</code> hoch und erhalte eine direkte Download-URL.</p>
+      <h1>JAR / JSON / ZIP Upload</h1>
+      <p>
+        Lade eine <code>.jar</code>, <code>.json</code> oder <code>.zip</code> (z. B. <code>mods.zip</code>) hoch
+        und erhalte eine direkte Download-URL.
+      </p>
 
       <div class="row">
-        <input id="fileInput" type="file" accept=".jar,.json,application/json" />
+        <input id="fileInput" type="file" accept=".jar,.json,.zip,application/json,application/zip" />
         <button id="uploadBtn" type="button">Hochladen</button>
       </div>
 
@@ -139,8 +142,8 @@
         }
 
         const ext = (file.name.split(".").pop() || "").toLowerCase();
-        if (ext !== "jar" && ext !== "json") {
-          setStatus("Nur .jar oder .json sind erlaubt.", "err");
+        if (ext !== "jar" && ext !== "json" && ext !== "zip") {
+          setStatus("Nur .jar, .json oder .zip sind erlaubt.", "err");
           return;
         }
 
