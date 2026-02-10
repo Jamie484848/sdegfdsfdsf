@@ -1,0 +1,17 @@
+{
+  "name": "callofmine-file-host",
+  "version": "1.0.0",
+  "description": "Simple upload and direct file hosting for JAR and JSON files",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "multer": "^2.0.2"
+  }
+}

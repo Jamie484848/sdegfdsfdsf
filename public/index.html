@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JAR/JSON Upload Host</title>
+    <style>
+      :root {
+        --bg: #f6f7fb;
+        --panel: #ffffff;
+        --text: #1a1f36;
+        --accent: #1e62d0;
+        --border: #d7deea;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: radial-gradient(circle at top right, #e8f0ff, var(--bg) 40%);
+        color: var(--text);
+        display: grid;
+        place-items: center;
+        padding: 24px;
+      }
+      .card {
+        width: 100%;
+        max-width: 680px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 24px;
+        box-shadow: 0 20px 50px rgba(26, 31, 54, 0.08);
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 1.5rem;
+      }
+      p {
+        margin: 0 0 18px;
+        color: #4f5d78;
+      }
+      .row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      input[type="file"] {
+        flex: 1;
+        min-width: 220px;
+      }
+      button {
+        border: none;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      #uploadBtn {
+        background: var(--accent);
+        color: white;
+      }
+      #copyBtn {
+        background: #eaf1ff;
+        color: #234e99;
+      }
+      #status {
+        margin-top: 14px;
+        min-height: 20px;
+        font-size: 0.95rem;
+      }
+      #output {
+        margin-top: 12px;
+        padding: 12px;
+        border: 1px dashed var(--border);
+        border-radius: 10px;
+        background: #fbfcff;
+        word-break: break-all;
+      }
+      .hidden {
+        display: none;
+      }
+      .ok {
+        color: #18794e;
+      }
+      .err {
+        color: #c0342d;
+      }
+      code {
+        background: #eef3ff;
+        border-radius: 6px;
+        padding: 2px 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <h1>JAR / JSON Upload</h1>
+      <p>Lade eine <code>.jar</code> oder <code>.json</code> hoch und erhalte eine direkte Download-URL.</p>
+
+      <div class="row">
+        <input id="fileInput" type="file" accept=".jar,.json,application/json" />
+        <button id="uploadBtn" type="button">Hochladen</button>
+      </div>
+
+      <div id="status"></div>
+
+      <div id="output" class="hidden">
+        <strong>Download-URL:</strong>
+        <div id="urlText"></div>
+        <div class="row" style="margin-top: 8px">
+          <button id="copyBtn" type="button">URL kopieren</button>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      const fileInput = document.getElementById("fileInput");
+      const uploadBtn = document.getElementById("uploadBtn");
+      const copyBtn = document.getElementById("copyBtn");
+      const statusEl = document.getElementById("status");
+      const outputEl = document.getElementById("output");
+      const urlText = document.getElementById("urlText");
+
+      let currentUrl = "";
+
+      function setStatus(text, cls) {
+        statusEl.textContent = text;
+        statusEl.className = cls || "";
+      }
+
+      uploadBtn.addEventListener("click", async () => {
+        const file = fileInput.files[0];
+        if (!file) {
+          setStatus("Bitte zuerst eine Datei auswaehlen.", "err");
+          return;
+        }
+
+        const ext = (file.name.split(".").pop() || "").toLowerCase();
+        if (ext !== "jar" && ext !== "json") {
+          setStatus("Nur .jar oder .json sind erlaubt.", "err");
+          return;
+        }
+
+        setStatus("Upload laeuft...", "");
+        outputEl.classList.add("hidden");
+        currentUrl = "";
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+          const res = await fetch("/upload", {
+            method: "POST",
+            body: formData
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data.error || "Upload fehlgeschlagen.");
+          }
+
+          currentUrl = data.url;
+          urlText.textContent = currentUrl;
+          outputEl.classList.remove("hidden");
+          setStatus("Upload erfolgreich.", "ok");
+        } catch (err) {
+          setStatus(err.message || "Fehler beim Upload.", "err");
+        }
+      });
+
+      copyBtn.addEventListener("click", async () => {
+        if (!currentUrl) return;
+        try {
+          await navigator.clipboard.writeText(currentUrl);
+          setStatus("URL kopiert.", "ok");
+        } catch (_err) {
+          setStatus("Konnte URL nicht kopieren.", "err");
+        }
+      });
+    </script>
+  </body>
+</html>
